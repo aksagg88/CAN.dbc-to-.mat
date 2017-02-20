@@ -28,21 +28,19 @@ BS_:
 BU_:
 
 
-BO_ 1180 NewMessage0: 8 Vector__XXX
- SG_ Engine1_Stop_Request : 55|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Engine2_Stop_Request : 55|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Engine3_Stop_Request : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+BO_ 123 NewMessage0: 8 Vector__XXX
+ SG_ Signal1 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Signal2 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Signal3 : 55|8@0+ (1,0) [0|0] "" Vector__XXX
 
-BO_ 968 NewMessage1: 8 Vector__XXX
- SG_ Engine1_RPM : 23|16@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Engine2_RPM : 23|16@0+ (1,0) [0|0] "" Vector__XXX
+BO_ 234 NewMessage1: 8 Vector__XXX
+ SG_ Signal4 : 23|16@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Signal5 : 23|16@0+ (1,0) [0|0] "" Vector__XXX
 
-BO_ 840 NewMessage2: 8 Vector__XXX
- SG_ MG1RPM : 23|16@0+ (1,0) [0|0] "" Vector__XXX
- SG_ MG2RPM : 23|16@0+ (1,0) [0|0] "" Vector__XXX
+BO_ 345 NewMessage2: 8 Vector__XXX
+ SG_ Signal6 : 23|16@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Signal7 : 23|16@0+ (1,0) [0|0] "" Vector__XXX
 
-BO_ 583 NewMessage3: 7 Vector__XXX
- SG_ Target_Engine1_RPM : 47|16@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Target_Engine2_RPM : 47|16@0+ (1,0) [0|0] "" Vector__XXX
-
-
+BO_ 456 NewMessage3: 7 Vector__XXX
+ SG_ Signal8 : 47|16@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Signal9 : 47|16@0+ (1,0) [0|0] "" Vector__XXX
