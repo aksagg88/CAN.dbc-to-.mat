@@ -1,14 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Sun Feb 19 12:13:01 2017
+Created on Wed Feb 22 02:32:09 2017
 
 @author: enterprise
 """
-
-
-import re
-
 
 class FrameList(object):
     def __init__(self):
@@ -126,10 +122,36 @@ class Signal(object):
         self._name = name
         self._attributes = {}
         self._values = {}
+        self._type = ''
 
     @property
     def name(self):
         return self._name
+        
+    @property
+    def SglType(self):
+        if self._signalsize == 1:
+            self._type = 'Boolean'
+        elif self._signalsize == 8:
+            if self._is_signed:
+                self._type = 'int8'
+            else:
+                self._type = 'uint8'
+        elif self._signalsize == 16:
+            if self._is_signed:
+                self._type = 'int16'
+            else:
+                self._type = 'uint16'
+        elif self._signalsize == 32:
+            if self._is_float:
+                self._type = 'float32'
+            elif self._is_signed:
+                self._type = 'int32'
+            else:
+                self._type = 'uint32'
+        else:
+            self._type = ''
+        return self._type
 
     @name.setter
     def name(self, value):
@@ -202,6 +224,10 @@ class Signal(object):
     @property
     def signalsize(self):
         return self._signalsize
+    
+    @property
+    def startbit(self):
+        return self._startbit
 
     @property
     def min(self):
@@ -218,6 +244,42 @@ class Signal(object):
     @max.setter
     def max(self, value):
         self._max = value
+    
+    def setStartbit(self, startBit, bitNumbering=None, startLittle=None):
+        """
+        set startbit.
+        bitNumbering is 1 for LSB0/LSBFirst, 0 for MSB0/MSBFirst.
+        If bit numbering is consistent with byte order (little=LSB0, big=MSB0)
+        (KCD, SYM), start bit unmodified.
+        Otherwise reverse bit numbering. For DBC, ArXML (OSEK),
+        both little endian and big endian use LSB0.
+        If bitNumbering is None, assume consistent with byte order.
+        If startLittle is set, given startBit is assumed start from lsb bit
+        rather than the start of the signal data in the message data
+        """
+        # bit numbering not consistent with byte order. reverse
+        if bitNumbering is not None and bitNumbering != self._is_little_endian:
+            startBit = startBit - (startBit % 8) + 7 - (startBit % 8)
+        # if given startbit is for the end of signal data (lsbit),
+        # convert to start of signal data (msbit)
+        if startLittle is True and self._is_little_endian is False:
+            startBit = startBit + 1 - self._signalsize
+        if startBit < 0:
+            print("wrong startbit found Signal: %s Startbit: %d" %
+                  (self.name, startBit))
+            raise Exception("startbit lower zero")
+        self._startbit = startBit
+
+    def getStartbit(self, bitNumbering=None, startLittle=None):
+        startBit = self._startbit
+        # convert from big endian start bit at
+        # start bit(msbit) to end bit(lsbit)
+        if startLittle is True and self._is_little_endian is False:
+            startBit = startBit + self._signalsize - 1
+        # bit numbering not consistent with byte order. reverse
+        if bitNumbering is not None and bitNumbering != self._is_little_endian:
+            startBit = startBit - (startBit % 8) + 7 - (startBit % 8)
+        return int(startBit)
 
     def __str__(self):
         return self._name
@@ -272,6 +334,12 @@ class Frame(object):
         self._attributes = {}
         self._receiver = []
         self._SignalGroups = []
+        self._num_signals = 0
+        
+    @property
+    def num_signals(self):
+        return len(self._signals)
+            
 
     @property
     def attributes(self):
@@ -472,59 +540,3 @@ class SignalGroup(object):
 
     def __iter__(self):
         return iter(self._members)
-
-
-infile = 'test.dbc'
-
-Fid = open(infile,'r') 
-
-fl = FrameList()
-
-for line in Fid:
-    if line.startswith('BO_'):
-        MsgPattern = "^BO\_ (\w+) (\w+) *: (\w+) (\w+)"
-        regexp = re.compile(MsgPattern)
-        temp = regexp.match(line)
-        fl.addFrame(Frame(temp.group(2),
-                          Id=temp.group(1),
-                          dlc=temp.group(3),
-                          transmitter=temp.group(4)))
-        
-        print(temp.group(2), temp.group(1), temp.group(3), temp.group(4))
-        
-    if line.startswith('SG_'):
-        SigPattern = "^SG\_ (\w+) : (\d+)\|(\d+)@(\d+)([\+|\-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \[([0-9.+\-eE]+)\|([0-9.+\-eE]+)\] \"(.*)\" (.*)"
-        regexp = re.compile(SigPattern)
-        temp = regexp.match(line)
-        print(temp.group(1))
-        if temp:
-            receiver = list(map(str.strip, temp.group(11).split(',')))
-            print('found signal')
-        tempSgl = Signal(sglName = temp.group(1),
-            startBit = temp.group(2),
-            signalSize=temp.group(3),
-            is_little_endian=(int(temp.group(4)) == 1),
-            is_signed=(temp.group(5) == '-'),
-            factor=temp.group(6),
-            offset=temp.group(7),
-            min=temp.group(8),
-            max=temp.group(9),
-            receiver = receiver)
-        print(tempSgl.name, tempSgl.signalsize)
-        fl.addSignalToLastFrame(tempSgl)
-        
-#    if line.find('BO_') != -1:
-#        MsgString = line[line.rfind('\\')+1:].split(' ')[4]
-#        print(MsgString)
-Fid.close() 
-
-
-## Create the mfile with this stuff
-
-print('m-file')
-for i,frame in enumerate(fl):
-    print(frame.name)
-    
-    for j,sgl in enumerate(frame.signals):
-        print(sgl.name)
-    
