@@ -24,7 +24,7 @@ def parse_dbc(infile):
                               Id=decodeMsg.group(1),
                               dlc=decodeMsg.group(3),
                               transmitter=decodeMsg.group(4)))
-            
+            print(decodeMsg.group(2))
         elif line.startswith(' SG_'):
             SigPattern = '^ SG\_ (\w+) : (\d+)\|(\d+)@(\d+)([\+|\-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \[([0-9.+\-eE]+)\|([0-9.+\-eE]+)\] \"(.*)\"(.*)'
             regexpsig = re.compile(SigPattern)
