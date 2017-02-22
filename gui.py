@@ -7,6 +7,7 @@ Created on Wed Feb 22 00:12:50 2017
 """
 
 import sys
+import os
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 from can2m import *
@@ -25,6 +26,7 @@ class Example(QtGui.QWidget):
         
         load = QtGui.QLabel('1. Load CAN .dbc file')
         generate = QtGui.QLabel('2. Generate .m file')
+        self.status = QtGui.QLabel('selct .dbc file to convert')
 
         
         bLoad = QtGui.QPushButton('Load', self)
@@ -44,6 +46,8 @@ class Example(QtGui.QWidget):
 
         grid.addWidget(generate, 1, 1)
         grid.addWidget(bGen, 2, 1)
+        
+        grid.addWidget(self.status,3, 0, 3, 1)
 
         self.setLayout(grid) 
         
@@ -61,9 +65,11 @@ class Example(QtGui.QWidget):
             print('load')
             self.showDialog()
             self.parse(self.fname)
+            self.status.text('.dbc file parsed')
             
         elif sender.text() == 'Generate':
             print('Generate')
+            self.gen(self.fname)
             
     def showDialog(self):
         filters = "dbc files (*.dbc);;m files (*.m)"
@@ -72,11 +78,26 @@ class Example(QtGui.QWidget):
         
     def parse(self,infile):
         self._fl = parse_dbc(infile)
-        
+    
+    def gen(self, infile):
+        print('input path: ', infile)
+        # filters = "dbc files (*.dbc);;m files (*.m)"
+        # selected_filter = "dbc files (*.dbc)"
+        outfile = QtGui.QFileDialog.getSaveFileName(self, 'Save .m File,infile')
+        print(outfile)
+        create_m_file(outfile, self._fl)
+    
     
 def main():
     
     app = QtGui.QApplication(sys.argv)
+    
+    window 	  = QtGui.QMainWindow()
+    palette 	  = QtGui.QPalette()
+    gridLayout	  = QtGui.QGridLayout()
+    centralWidget = QtGui.QWidget()
+    window.setCentralWidget(centralWidget)
+    
     ex = Example()
     sys.exit(app.exec_())
 
